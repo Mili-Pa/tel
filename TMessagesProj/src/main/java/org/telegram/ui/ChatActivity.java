@@ -643,6 +643,19 @@ public class ChatActivity extends BaseFragment implements
     private FlagSecureReason flagSecure;
     public boolean isFullyVisible;
 
+    // Disabled FlagSecureReason: provide a no-op stub so all existing
+    // usages remain callable but do nothing (disables secure-flag behavior).
+    private static class FlagSecureReason {
+        public FlagSecureReason(android.view.Window window, java.util.function.BooleanSupplier condition) {
+        }
+
+        public void invalidate() {
+        }
+
+        public void detach() {
+        }
+    }
+
     private MessageObject hintMessageObject;
     private int hintMessageType;
     private MessageObject hint2MessageObject;
@@ -29647,7 +29660,7 @@ public class ChatActivity extends BaseFragment implements
             chatListView.invalidate();
         }
 
-        flagSecure.attach();
+        flagSecure.detach();
 
         if (starReactionsOverlay != null) {
             starReactionsOverlay.bringToFront();
