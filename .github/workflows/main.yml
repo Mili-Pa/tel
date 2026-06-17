@@ -1,0 +1,38 @@
+name: Build Telegram APK
+
+on:
+  workflow_dispatch:        # دستی از تب Actions اجرا می‌شه
+  push:
+    branches: [ master ]    # یا شاخه‌ی خودت
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    steps:
+      - name: Free up disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          sudo docker image prune -a -f
+
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Build via official Dockerfile
+        run: docker build -t telegram-build .
+
+      - name: Run build inside container
+        run: docker run --rm -v "${{ github.workspace }}":/home/source telegram-build
+
+      - name: Upload build outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: telegram-build-output
+          path: |
+            **/build/outputs/apk/**/*.apk
+            **/build/outputs/bundle/**/*.aab
+          if-no-files-found: warn
